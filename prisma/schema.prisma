@@ -1,0 +1,38 @@
+// This is your Prisma schema file.
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Sheet {
+  id           String        @id @default(cuid())
+  name         String
+  month        String?       // Format: YYYY-MM (e.g. "2026-01")
+  description  String?
+  currency     String        @default("$")
+  color        String        @default("indigo")
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  sheetId     String
+  sheet       Sheet    @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+  date        String   // YYYY-MM-DD
+  description String
+  type        String   // "INCOME" (Received) or "EXPENSE" (Sent)
+  amount      Float    // Magnitude (positive number)
+  category    String   @default("General")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sheetId])
+}

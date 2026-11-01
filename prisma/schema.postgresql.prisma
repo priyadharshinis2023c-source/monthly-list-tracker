@@ -1,0 +1,37 @@
+// Prisma Schema configured for PostgreSQL (Vercel / Neon / Supabase)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Sheet {
+  id           String        @id @default(cuid())
+  name         String
+  month        String?       // Format: YYYY-MM
+  description  String?
+  currency     String        @default("$")
+  color        String        @default("indigo")
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  sheetId     String
+  sheet       Sheet    @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+  date        String   // YYYY-MM-DD
+  description String
+  type        String   // "INCOME" or "EXPENSE"
+  amount      Float
+  category    String   @default("General")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sheetId])
+}
